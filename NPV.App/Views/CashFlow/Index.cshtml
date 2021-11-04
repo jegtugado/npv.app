@@ -3,13 +3,6 @@
 }
 
 <h2>Cash Flow</h2>
-<div id="divMaxCount" class="row">
-    <div class="col-12">
-        <div class="alert alert-info" role="alert" style="{ display: none; }">
-            Maximum number of cash flow reached. Please remove a record to allow adding a new one.
-        </div>
-    </div>
-</div>
 <div class="row mb-2">
     <div class="col-12">
         <button id="btnAddCashFlow" type="button" class="btn btn-primary"><i class="fas fa-plus"></i> Add</button>        
@@ -23,7 +16,6 @@
 @section Scripts {
     <script type="text/javascript">
         $(document).ready(() => {
-            $('#divMaxCount').hide();
             $('#divPartialGetTable').load('@Url.Content("/CashFlow/GetTable")')
 
             $('#btnAddCashFlow').on('click', () => {
@@ -40,6 +32,7 @@
                                 }),
                                 contentType: 'application/json',
                                 success: function (data) {
+                                    toastr.success("Record created.");
                                     $('#divPartialGetTable').load('@Url.Content("/CashFlow/GetTable")')
                                 }
                             });
@@ -54,10 +47,9 @@
         }).on('table-count', (e, count) => {
             if (count >= 10) {
                 $('#btnAddCashFlow').attr('disabled', 'disabled');
-                $('#divMaxCount').show();
+                toastr.info('Maximum number of cash flow reached. Please remove a record to allow adding a new one.');
             } else {
                 $('#btnAddCashFlow').removeAttr('disabled');
-                $('#divMaxCount').hide();
             }
         });
 
@@ -70,6 +62,7 @@
                             type: 'DELETE',
                             url: '@Url.Action("DeleteCashFlow", "CashFlow")/' + id,
                             success: function (data) {
+                                toastr.success("Record deleted.");
                                 $('#divPartialGetTable').load('@Url.Content("/CashFlow/GetTable")')
                             }
                         });
@@ -96,6 +89,7 @@
                             }),
                             contentType: 'application/json',
                             success: function (data) {
+                                toastr.success("Record updated.");
                                 $('#divPartialGetTable').load('@Url.Content("/CashFlow/GetTable")')
                             }
                         });

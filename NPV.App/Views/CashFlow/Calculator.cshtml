@@ -4,13 +4,21 @@
 <div class="form-group row m-2">
     <label for="txtLowerBound" class="col-2 my-auto">Lower Bound:</label>
     <div class="col-2">
-        <input id="txtLowerBound" name="txtLowerBound" type="number" class="form-control text-end" min="0" />
+        <input id="txtLowerBound" name="txtLowerBound" type="number" class="form-control text-end" min="0" readonly />
+    </div>
+    <div class="text-center col-2">
+        <button id="btnAddLowerBound" type="button" class="btn btn-outline-primary"><i class="fas fa-plus"></i></button>
+        <button id="btnSubtractLowerBound" type="button" class="btn btn-outline-secondary"><i class="fas fa-minus"></i></button>
     </div>
 </div>
 <div class="form-group row m-2">
     <label for="txtUpperBound" class="col-2 my-auto">Upper Bound:</label>
     <div class="col-2">
-        <input id="txtUpperBound" name="txtUpperBound" type="number" class="form-control text-end" min="0" />
+        <input id="txtUpperBound" name="txtUpperBound" type="number" class="form-control text-end" min="0" readonly />
+    </div>
+    <div class="text-center col-2">
+        <button id="btnAddUpperBound" type="button" class="btn btn-outline-primary"><i class="fas fa-plus"></i></button>
+        <button id="btnSubtractUpperBound" type="button" class="btn btn-outline-secondary"><i class="fas fa-minus"></i></button>
     </div>
 </div>
 <div class="form-group row m-2">
@@ -28,7 +36,7 @@
     </div>
 </div>
 <div class="row">
-    <div class="col-12">
+    <div class="chart-container col-12">
         <canvas id="npvChart" width="400" height="400"></canvas>
     </div>
 </div>
@@ -43,22 +51,20 @@
 
             $('#txtLowerBound').val(data.lowerBound).on('change', e => {
                 const value = Number(e.target.value);
-                console.log(value);
                 if (value >= 0 && value <= data.discountRate) {
                     data.lowerBound = value;
                 } else {
+                    toastr.warning('Invalid lower bound value.');
                     $('#txtLowerBound').val(data.lowerBound).trigger('change');
                 }
             });
 
             $('#txtUpperBound').val(data.upperBound).on('change', e => {
                 const value = Number(e.target.value);
-                console.log('value: ' + value);
-                console.log('ub: ' + data.upperBound);
-                if (value >= data.discountRate) {
+                if (value >= data.lowerBound && value >= data.discountRate) {
                     data.upperBound = value;
                 } else {
-                    console.log('error UB: ' + data.upperBound);
+                    toastr.warning('Discount rate value must be between the lower and upper bound.');
                     $('#txtUpperBound').val(data.upperBound).trigger('change');
                 }
             });
@@ -70,7 +76,44 @@
                     $('#divPartialDiscountTable').load('@Url.Content("/CashFlow/DiscountTable")' + '?discountRate=' + data.discountRate)
                     updateChart();
                 } else {
+                    toastr.warning('Discount rate value must be between the lower and upper bound.');
                     $('#txtDiscountRate').val(data.discountRate).trigger('change');
+                }
+            });
+
+            $('#btnAddLowerBound').on('click', () => {
+                const value = data.lowerBound + 1;
+                if (value >= 0 && value <= data.discountRate) {
+                    $('#txtLowerBound').val(value).trigger('change');
+                } else {
+                    toastr.warning('Invalid lower bound value.');
+                }
+            });
+
+            $('#btnSubtractLowerBound').on('click', () => {
+                const value = data.lowerBound - 1;
+                if (value >= 0 && value <= data.discountRate) {
+                    $('#txtLowerBound').val(value).trigger('change');
+                } else {
+                    toastr.warning('Invalid lower bound value.');
+                }
+            });
+
+            $('#btnAddUpperBound').on('click', () => {
+                const value = data.upperBound + 1;
+                if (value >= data.discountRate) {
+                    $('#txtUpperBound').val(value).trigger('change');
+                } else {
+                    toastr.warning('Invalid upper bound value.');
+                }
+            });
+
+            $('#btnSubtractUpperBound').on('click', () => {
+                const value = data.upperBound - 1;
+                if (value >= data.lowerBound && value >= data.discountRate) {
+                    $('#txtUpperBound').val(value).trigger('change');
+                } else {
+                    toastr.warning('Invalid upper bound value.');
                 }
             });
 
@@ -78,6 +121,8 @@
                 const value = data.discountRate + 0.25;
                 if (value >= data.lowerBound && value <= data.upperBound) {
                     $('#txtDiscountRate').val(value).trigger('change');
+                } else {
+                    toastr.warning('Discount rate value must be between the lower and upper bound.');
                 }
             });
 
@@ -85,12 +130,8 @@
                 const value = data.discountRate - 0.25;
                 if (value >= data.lowerBound && value <= data.upperBound) {
                     $('#txtDiscountRate').val(value).trigger('change');
-                    $('#txtLowerBound').attr({
-                        'max': value
-                    });
-                    $('#txtUpperBound').attr({
-                        'min': value
-                    });
+                } else {
+                    toastr.warning('Discount rate value must be between the lower and upper bound.');
                 }
             });
 
@@ -99,7 +140,6 @@
                     type: 'GET',
                     url: '@Url.Action("GetData", "NPV")' + '?discountRate=' + data.discountRate,
                     success: function (data) {
-                        console.log(npvChart);
                         if (!npvChart) {
                             npvChart = new Chart(document.getElementById("npvChart"), {
                                 type: 'bar',
@@ -107,6 +147,10 @@
                                     labels: data.map(d => d.year),
                                     datasets: [
                                         {
+                                            label: "Cash Value",
+                                            backgroundColor: "#3cde47",
+                                            data: data.map(d => d.cashFlow)
+                                        }, {
 
                                             label: "Present Value",
                                             backgroundColor: "#3e95cd",
@@ -115,11 +159,12 @@
                                             label: "Discounted Value",
                                             backgroundColor: "#8e5ea2",
                                             data: data.map(d => d.discountedValue)
-                                        }
+                                        },
                                     ]
                                 },
                                 options: {
                                     responsive: true,
+                                    maintainAspectRatio: false,
                                     plugins: {
                                         title: {
                                             display: true,
@@ -154,6 +199,10 @@
                             npvChart.data.labels = data.map(d => d.year);
                             npvChart.data.datasets = [
                                 {
+                                    label: "Cash Value",
+                                    backgroundColor: "#8e5ea2",
+                                    data: data.map(d => d.cashFlow)
+                                }, {
 
                                     label: "Present Value",
                                     backgroundColor: "#3e95cd",
@@ -162,7 +211,7 @@
                                     label: "Discounted Value",
                                     backgroundColor: "#8e5ea2",
                                     data: data.map(d => d.discountedValue)
-                                }
+                                }, 
                             ];
                             npvChart.update();
                         }
