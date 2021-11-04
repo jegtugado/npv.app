@@ -1,0 +1,26 @@
+﻿@model IEnumerable<NPV.App.Models.CashFlowViewModel>
+
+<table class="table table-light table-hover table-bordered">
+    <thead>
+        <tr>
+            <th class="text-center">Value</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach(var cashFlow in Model)
+        {
+            <tr data-id="@cashFlow.Id">
+                <td class="text-end">@cashFlow.Value.ToString("C")</td>
+                <td>
+                    <button type="button" class="btn btn-outline-primary" onclick="UpdateCF(@cashFlow.Id, @cashFlow.Value)"><i class="fas fa-pen"></i> Update</button>
+                    <button type="button" class="btn btn-outline-danger" onclick="DeleteCF(@cashFlow.Id)"><i class="fas fa-trash"></i> Delete</button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<script type="text/javascript">
+    $(document).trigger('table-count', @Model.Count());
+</script>

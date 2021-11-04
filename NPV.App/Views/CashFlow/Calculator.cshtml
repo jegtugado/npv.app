@@ -1,0 +1,182 @@
+﻿@{
+    ViewData["Title"] = "NPV Calculator";
+}
+<div class="form-group row m-2">
+    <label for="txtLowerBound" class="col-2 my-auto">Lower Bound:</label>
+    <div class="col-2">
+        <input id="txtLowerBound" name="txtLowerBound" type="number" class="form-control text-end" min="0" />
+    </div>
+</div>
+<div class="form-group row m-2">
+    <label for="txtUpperBound" class="col-2 my-auto">Upper Bound:</label>
+    <div class="col-2">
+        <input id="txtUpperBound" name="txtUpperBound" type="number" class="form-control text-end" min="0" />
+    </div>
+</div>
+<div class="form-group row m-2">
+    <label for="txtDiscountRate" class="col-2 my-auto">Discount Rate:</label>
+    <div class="col-2">
+        <input id="txtDiscountRate" name="txtDiscountRate" type="number" class="form-control text-end" min="0" readonly />
+    </div>
+    <div class="text-center col-2">
+        <button id="btnAddDiscountRate" type="button" class="btn btn-outline-primary"><i class="fas fa-plus"></i></button>
+        <button id="btnSubtractDiscountRate" type="button" class="btn btn-outline-secondary"><i class="fas fa-minus"></i></button>
+    </div>
+</div>
+<div class="row">
+    <div class="col-12" id="divPartialDiscountTable">
+    </div>
+</div>
+<div class="row">
+    <div class="col-12">
+        <canvas id="npvChart" width="400" height="400"></canvas>
+    </div>
+</div>
+
+@section Scripts {
+    <script type="text/javascript">
+        $(document).ready(() => {
+            let npvChart = undefined;
+            const data = new CalcData();
+
+            $('#divPartialDiscountTable').load('@Url.Content("/CashFlow/DiscountTable")' + '?discountRate=' + data.discountRate)
+
+            $('#txtLowerBound').val(data.lowerBound).on('change', e => {
+                const value = Number(e.target.value);
+                console.log(value);
+                if (value >= 0 && value <= data.discountRate) {
+                    data.lowerBound = value;
+                } else {
+                    $('#txtLowerBound').val(data.lowerBound).trigger('change');
+                }
+            });
+
+            $('#txtUpperBound').val(data.upperBound).on('change', e => {
+                const value = Number(e.target.value);
+                console.log('value: ' + value);
+                console.log('ub: ' + data.upperBound);
+                if (value >= data.discountRate) {
+                    data.upperBound = value;
+                } else {
+                    console.log('error UB: ' + data.upperBound);
+                    $('#txtUpperBound').val(data.upperBound).trigger('change');
+                }
+            });
+
+            $('#txtDiscountRate').val(data.discountRate).on('change', e => {
+                const value = Number(e.target.value);
+                if (value >= data.lowerBound && value <= data.upperBound) {
+                    data.discountRate = value;
+                    $('#divPartialDiscountTable').load('@Url.Content("/CashFlow/DiscountTable")' + '?discountRate=' + data.discountRate)
+                    updateChart();
+                } else {
+                    $('#txtDiscountRate').val(data.discountRate).trigger('change');
+                }
+            });
+
+            $('#btnAddDiscountRate').on('click', () => {
+                const value = data.discountRate + 0.25;
+                if (value >= data.lowerBound && value <= data.upperBound) {
+                    $('#txtDiscountRate').val(value).trigger('change');
+                }
+            });
+
+            $('#btnSubtractDiscountRate').on('click', () => {
+                const value = data.discountRate - 0.25;
+                if (value >= data.lowerBound && value <= data.upperBound) {
+                    $('#txtDiscountRate').val(value).trigger('change');
+                    $('#txtLowerBound').attr({
+                        'max': value
+                    });
+                    $('#txtUpperBound').attr({
+                        'min': value
+                    });
+                }
+            });
+
+            const updateChart = () => {
+                $.ajax({
+                    type: 'GET',
+                    url: '@Url.Action("GetData", "NPV")' + '?discountRate=' + data.discountRate,
+                    success: function (data) {
+                        console.log(npvChart);
+                        if (!npvChart) {
+                            npvChart = new Chart(document.getElementById("npvChart"), {
+                                type: 'bar',
+                                data: {
+                                    labels: data.map(d => d.year),
+                                    datasets: [
+                                        {
+
+                                            label: "Present Value",
+                                            backgroundColor: "#3e95cd",
+                                            data: data.map(d => d.presentValue)
+                                        }, {
+                                            label: "Discounted Value",
+                                            backgroundColor: "#8e5ea2",
+                                            data: data.map(d => d.discountedValue)
+                                        }
+                                    ]
+                                },
+                                options: {
+                                    responsive: true,
+                                    plugins: {
+                                        title: {
+                                            display: true,
+                                            text: 'Net Present Value Calculator'
+                                        }
+                                    },
+                                    scales: {
+                                        x: {
+                                            title: {
+                                                display: true,
+                                                text: 'Year',
+                                                align: 'center'
+                                            }
+                                        },
+                                        y: {
+                                            ticks: {
+                                                // Include a dollar sign in the ticks
+                                                callback: function (value, index, values) {
+                                                    return '$' + value;
+                                                },
+                                            },
+                                            title: {
+                                                display: true,
+                                                text: 'Amount',
+                                                align: 'center'
+                                            }
+                                        }
+                                    }
+                                }
+                            });
+                        } else {
+                            npvChart.data.labels = data.map(d => d.year);
+                            npvChart.data.datasets = [
+                                {
+
+                                    label: "Present Value",
+                                    backgroundColor: "#3e95cd",
+                                    data: data.map(d => d.presentValue)
+                                }, {
+                                    label: "Discounted Value",
+                                    backgroundColor: "#8e5ea2",
+                                    data: data.map(d => d.discountedValue)
+                                }
+                            ];
+                            npvChart.update();
+                        }
+                    }
+                });
+            };
+
+            updateChart();
+        });
+
+        function CalcData() {
+            this.lowerBound = 0;
+            this.upperBound = 15;
+            this.discountRate = 10;
+        }
+    </script>
+}

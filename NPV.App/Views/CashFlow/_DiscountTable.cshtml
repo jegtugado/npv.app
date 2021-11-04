@@ -1,0 +1,49 @@
+﻿@model NPV.App.Models.CalculatorViewModel
+
+<table class="table table-hover">
+    <thead>
+        <tr>
+            <td class="bg-dark text-white">Year</td>
+            @foreach(var data in Model.Data)
+            {
+                <td class="bg-dark text-white text-center">@data.Year</td>
+            }
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td class="bg-primary text-white">Discount Factor</td>
+            @foreach (var data in Model.Data)
+            {
+                <td class="text-end">@data.DiscountFactor.ToString("#.00")</td>
+            }
+        </tr>
+        <tr>
+            <td class="bg-primary text-white">Cash Flow</td>
+            @foreach (var data in Model.Data)
+            {
+                <td class="text-end">@data.CashFlow.ToString("C")</td>
+            }
+        </tr>
+        <tr>
+            <td class="bg-primary text-white">Present Value</td>
+            @foreach (var data in Model.Data)
+            {
+                <td class="text-end">@data.PresentValue.ToString("C")</td>
+            }
+        </tr>
+        <tr>
+            <td class="bg-primary text-white">Discounted Value</td>
+            @foreach (var data in Model.Data)
+            {
+                <td class="text-end">@data.DiscountedValue.ToString("C")</td>
+            }
+        </tr>        
+    </tbody>
+    <tfoot>
+        <tr>
+            <td class="bg-dark text-white">Net Present Value</td>
+            <td class="bg-dark text-white text-end" colspan="@Model.Data.Count()">@Model.NetPresentValue.ToString("C")</td>
+        </tr>
+    </tfoot>
+</table>
