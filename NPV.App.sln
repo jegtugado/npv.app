@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31613.86
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NPV.App", "NPV.App\NPV.App.csproj", "{E33E05D1-F0E6-4368-9149-CCF54CCF82A9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NPV.Test", "NPV.Test\NPV.Test.csproj", "{B3E75FDA-3750-4FD5-83D4-3E04594549B9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NPV.Models", "NPV.Models\NPV.Models.csproj", "{03646591-864C-46CC-9AB7-FEF8B48B48D2}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E33E05D1-F0E6-4368-9149-CCF54CCF82A9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E33E05D1-F0E6-4368-9149-CCF54CCF82A9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E33E05D1-F0E6-4368-9149-CCF54CCF82A9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E33E05D1-F0E6-4368-9149-CCF54CCF82A9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B3E75FDA-3750-4FD5-83D4-3E04594549B9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B3E75FDA-3750-4FD5-83D4-3E04594549B9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B3E75FDA-3750-4FD5-83D4-3E04594549B9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B3E75FDA-3750-4FD5-83D4-3E04594549B9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{03646591-864C-46CC-9AB7-FEF8B48B48D2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{03646591-864C-46CC-9AB7-FEF8B48B48D2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{03646591-864C-46CC-9AB7-FEF8B48B48D2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{03646591-864C-46CC-9AB7-FEF8B48B48D2}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {821740AB-105C-453A-936E-0D968ED94F84}
+	EndGlobalSection
+EndGlobal
