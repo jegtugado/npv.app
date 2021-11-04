@@ -7,8 +7,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NPV.App", "NPV.App\NPV.App.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NPV.Test", "NPV.Test\NPV.Test.csproj", "{B3E75FDA-3750-4FD5-83D4-3E04594549B9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NPV.Models", "NPV.Models\NPV.Models.csproj", "{03646591-864C-46CC-9AB7-FEF8B48B48D2}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -23,10 +21,6 @@ Global
 		{B3E75FDA-3750-4FD5-83D4-3E04594549B9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B3E75FDA-3750-4FD5-83D4-3E04594549B9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B3E75FDA-3750-4FD5-83D4-3E04594549B9}.Release|Any CPU.Build.0 = Release|Any CPU
-		{03646591-864C-46CC-9AB7-FEF8B48B48D2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{03646591-864C-46CC-9AB7-FEF8B48B48D2}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{03646591-864C-46CC-9AB7-FEF8B48B48D2}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{03646591-864C-46CC-9AB7-FEF8B48B48D2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
