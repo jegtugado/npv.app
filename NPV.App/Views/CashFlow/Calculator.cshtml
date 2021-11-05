@@ -35,6 +35,17 @@
     <div class="col-12" id="divPartialDiscountTable">
     </div>
 </div>
+<div class="form-group row m-2">
+    <label for="selChartType" class="col-2 my-auto">Chart Type:</label>
+    <div class="col-2">
+        <select id="selChartType" name="selChartType" class="form-control">
+            <option value="bar" selected>Bar</option>
+            <option value="radar">Radar</option>
+            <option value="line">Line</option>
+            <option value="scatter">Scatter</option>
+        </select>
+    </div>
+</div>
 <div class="row">
     <div class="chart-container col-12">
         <canvas id="npvChart" width="400" height="400"></canvas>
@@ -135,85 +146,133 @@
                 }
             });
 
+            $('#selChartType').on('change', () => {
+                updateChart();
+            });
+
+            const initializeChart = (chartType, data) => {
+                npvChart = new Chart(document.getElementById("npvChart"), {
+                    type: chartType,
+                    data: {
+                        labels: data.map(d => d.year),
+                        datasets: [
+                            {
+                                label: "Cash Value",
+                                backgroundColor: 'rgba(12, 173, 55, 0.5)',
+                                borderColor: 'rgb(12, 173, 55)',
+                                pointBackgroundColor: 'rgb(12, 173, 55)',
+                                pointBorderColor: '#fff',
+                                pointHoverBackgroundColor: '#fff',
+                                pointHoverBorderColor: 'rgb(12, 173, 55)',
+                                data: data.map(d => d.cashFlow)
+                            }, {
+
+                                label: "Present Value",
+                                fill: true,
+                                backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                                borderColor: 'rgb(54, 162, 235)',
+                                pointBackgroundColor: 'rgb(54, 162, 235)',
+                                pointBorderColor: '#fff',
+                                pointHoverBackgroundColor: '#fff',
+                                pointHoverBorderColor: 'rgb(54, 162, 235)',
+                                data: data.map(d => d.presentValue)
+                            }, {
+                                label: "Discounted Value",
+                                fill: true,
+                                backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                                borderColor: 'rgb(255, 99, 132)',
+                                pointBackgroundColor: 'rgb(255, 99, 132)',
+                                pointBorderColor: '#fff',
+                                pointHoverBackgroundColor: '#fff',
+                                pointHoverBorderColor: 'rgb(255, 99, 132)',
+                                data: data.map(d => d.discountedValue)
+                            },
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'Net Present Value Calculator'
+                            }
+                        },
+                        scales: {
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Year',
+                                    align: 'center'
+                                }
+                            },
+                            y: {
+                                ticks: {
+                                    // Include a dollar sign in the ticks
+                                    callback: function (value, index, values) {
+                                        return '$' + value;
+                                    },
+                                },
+                                title: {
+                                    display: true,
+                                    text: 'Amount',
+                                    align: 'center'
+                                }
+                            }
+                        }
+                    }
+                });
+            };
+
             const updateChart = () => {
                 $.ajax({
                     type: 'GET',
                     url: '@Url.Action("GetData", "NPV")' + '?discountRate=' + data.discountRate,
                     success: function (data) {
+                        const chartType = $('#selChartType').val();
                         if (!npvChart) {
-                            npvChart = new Chart(document.getElementById("npvChart"), {
-                                type: 'bar',
-                                data: {
-                                    labels: data.map(d => d.year),
-                                    datasets: [
-                                        {
-                                            label: "Cash Value",
-                                            backgroundColor: "#3cde47",
-                                            data: data.map(d => d.cashFlow)
-                                        }, {
-
-                                            label: "Present Value",
-                                            backgroundColor: "#3e95cd",
-                                            data: data.map(d => d.presentValue)
-                                        }, {
-                                            label: "Discounted Value",
-                                            backgroundColor: "#8e5ea2",
-                                            data: data.map(d => d.discountedValue)
-                                        },
-                                    ]
-                                },
-                                options: {
-                                    responsive: true,
-                                    maintainAspectRatio: false,
-                                    plugins: {
-                                        title: {
-                                            display: true,
-                                            text: 'Net Present Value Calculator'
-                                        }
-                                    },
-                                    scales: {
-                                        x: {
-                                            title: {
-                                                display: true,
-                                                text: 'Year',
-                                                align: 'center'
-                                            }
-                                        },
-                                        y: {
-                                            ticks: {
-                                                // Include a dollar sign in the ticks
-                                                callback: function (value, index, values) {
-                                                    return '$' + value;
-                                                },
-                                            },
-                                            title: {
-                                                display: true,
-                                                text: 'Amount',
-                                                align: 'center'
-                                            }
-                                        }
-                                    }
-                                }
-                            });
+                            initializeChart(chartType, data);
                         } else {
-                            npvChart.data.labels = data.map(d => d.year);
-                            npvChart.data.datasets = [
-                                {
-                                    label: "Cash Value",
-                                    backgroundColor: "#3cde47",
-                                    data: data.map(d => d.cashFlow)
-                                }, {
+                            if (chartType != npvChart.type) {
+                                npvChart.destroy();
+                                initializeChart(chartType, data);
+                            } else {
+                                npvChart.data.labels = data.map(d => d.year);
+                                npvChart.data.datasets = [
+                                    {
+                                        label: "Cash Value",
+                                        backgroundColor: 'rgba(12, 173, 55, 0.5)',
+                                        borderColor: 'rgb(12, 173, 55)',
+                                        pointBackgroundColor: 'rgb(12, 173, 55)',
+                                        pointBorderColor: '#fff',
+                                        pointHoverBackgroundColor: '#fff',
+                                        pointHoverBorderColor: 'rgb(12, 173, 55)',
+                                        data: data.map(d => d.cashFlow)
+                                    }, {
 
-                                    label: "Present Value",
-                                    backgroundColor: "#3e95cd",
-                                    data: data.map(d => d.presentValue)
-                                }, {
-                                    label: "Discounted Value",
-                                    backgroundColor: "#8e5ea2",
-                                    data: data.map(d => d.discountedValue)
-                                }, 
-                            ];
-                            npvChart.update();
+                                        label: "Present Value",
+                                        fill: true,
+                                        backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                                        borderColor: 'rgb(54, 162, 235)',
+                                        pointBackgroundColor: 'rgb(54, 162, 235)',
+                                        pointBorderColor: '#fff',
+                                        pointHoverBackgroundColor: '#fff',
+                                        pointHoverBorderColor: 'rgb(54, 162, 235)',
+                                        data: data.map(d => d.presentValue)
+                                    }, {
+                                        label: "Discounted Value",
+                                        fill: true,
+                                        backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                                        borderColor: 'rgb(255, 99, 132)',
+                                        pointBackgroundColor: 'rgb(255, 99, 132)',
+                                        pointBorderColor: '#fff',
+                                        pointHoverBackgroundColor: '#fff',
+                                        pointHoverBorderColor: 'rgb(255, 99, 132)',
+                                        data: data.map(d => d.discountedValue)
+                                    },
+                                ];
+                                npvChart.update();
+                            }                            
                         }
                     }
                 });
