@@ -1,33 +1,59 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using NPV.App.Controllers;
 using NPV.App.Data;
 using NPV.App.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using Xunit;
 
 namespace NPV.Unit.Test
 {
-    public class CashFlowControllerTest : IClassFixture<NPVContextFixture>
+    public class CashFlowControllerTest : IDisposable
     {
         private readonly NPVContext context;
         private readonly CashFlowController cashFlowController;
 
-        public CashFlowControllerTest(NPVContextFixture npvContextFixture)
+        public CashFlowControllerTest()
         {
             // Arrange
-            this.context = npvContextFixture.Context;
+            var options = new DbContextOptionsBuilder<NPVContext>()
+                         .UseInMemoryDatabase(databaseName: "CashFlow")
+                         .Options;
+            this.context = new NPVContext(options);
             this.cashFlowController = new CashFlowController(this.context);
+
+            Setup();
+        }
+
+        private void Setup()
+        {
+            this.context.CashFlows.AddRange(
+                new CashFlow() { Id = 1, Value = 10000 },
+                new CashFlow() { Id = 2, Value = 10000 },
+                new CashFlow() { Id = 3, Value = 10000 });
+            this.context.SaveChanges();
+        }
+
+        public void Dispose()
+        {
+            this.context.Database.EnsureDeleted();
+            this.context.Dispose();
         }
 
         [Theory, MemberData(nameof(DummyAddCashFlow))]
-        public async Task AddCashFlow_Creates_CashFlow(CashFlowBindingModel model)
+        public async Task AddCashFlow_Creates_CashFlow(CashFlowBindingModel model, int expectedCount)
         {
             // Act
             var result = await this.cashFlowController.AddCashFlow(model);
             // Assert
             var statusResult = Assert.IsType<OkResult>(result);
+
+            Assert.Equal((int)HttpStatusCode.OK, statusResult.StatusCode);
+            Assert.Equal(expectedCount, this.context.CashFlows.Count());
         }
 
         [Fact]
@@ -48,7 +74,7 @@ namespace NPV.Unit.Test
             var viewResult = Assert.IsType<PartialViewResult>(result);
             var model = Assert.IsAssignableFrom<IEnumerable<CashFlowViewModel>>(viewResult.ViewData.Model);
 
-            Assert.Equal(DummyAddCashFlow.Count(), model.Count());
+            Assert.Equal(3, model.Count());
         }
 
         [Fact]
@@ -62,7 +88,7 @@ namespace NPV.Unit.Test
             var viewResult = Assert.IsType<PartialViewResult>(result);
             var model = Assert.IsAssignableFrom<DiscountTableViewModel>(viewResult.ViewData.Model);
 
-            Assert.Equal(DummyAddCashFlow.Count(), model.Data.Count());
+            Assert.Equal(3, model.Data.Count());
             Assert.All(model.Data, item => item.CashFlow = 10000);
         }
 
@@ -71,13 +97,13 @@ namespace NPV.Unit.Test
         {
             new object[] { new CashFlowBindingModel() {
                 Value = 10000
-            } },
+            }, 4 },
             new object[] { new CashFlowBindingModel() {
                 Value = 10000
-            } },
+            }, 4 },
             new object[] { new CashFlowBindingModel() {
                 Value = 10000
-            } }
+            }, 4 }
         };
     }
 }
