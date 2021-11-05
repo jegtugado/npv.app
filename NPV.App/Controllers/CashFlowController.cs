@@ -38,13 +38,13 @@ namespace NPV.App.Controllers
         {
             var cashFlows = await this.context.CashFlows.AsNoTracking().ToListAsync();
             var data = cashFlows.Select((r, i) => new DataViewModel(i + 1, discountRate, r.Value));
-            var viewModel = new CalculatorViewModel(data);
+            var viewModel = new DiscountTableViewModel(data);
 
             return PartialView("_DiscountTable", viewModel);
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddCashFlow([FromBody] CashFlowViewModel model)
+        public async Task<IActionResult> AddCashFlow([FromBody] CashFlowBindingModel model)
         {
             if (ModelState.IsValid)
             {
@@ -59,7 +59,7 @@ namespace NPV.App.Controllers
         }
 
         [HttpPut]
-        public async Task<IActionResult> UpdateCashFlow([FromRoute]int id, [FromBody] CashFlowViewModel model)
+        public async Task<IActionResult> UpdateCashFlow([FromRoute]int id, [FromBody] CashFlowBindingModel model)
         {
             if (ModelState.IsValid)
             {
